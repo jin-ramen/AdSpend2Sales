@@ -1,43 +1,37 @@
 from src.cost_functions import compute_cost
+import copy
 
 def compute_gradient(x, y, w, b): 
     m = x.shape[0]
 
-    dj_dw = (x * (w * x + b - y)).sum() / m
-    dj_db = (w * x + b - y).sum() / m
+    f_wb = w*x + b
+    dj_dw = (x * (f_wb - y)).sum() / m
+    dj_db = (f_wb - y).sum() / m
 
     return dj_dw, dj_db
 
 def gradient_descent(x, y, w_in, b_in, alpha, num_iters): 
-    """
-    Performs gradient descent to fit w, b by taking num_iters gradient steps with lerning rate alpha
-
-    Args: 
-        x : Data, m examples
-        y: target variable
-        w_in, b_in (scalar): initial value for model parameters
-        alpha (float): learning rate
-        num_iters (int): number of iterations to run gradient descent
-
-    Returns: 
-        w (scalar): updated value of parameter after running gradient descent
-        b (scalar): updated value of parameter after running gradient descent
-        J_history (List): History of cost values
-        p_history (List): History of parameters [w,b]
-    """
+    m = len(x)
 
     J_history = []
-    p_history = []
-
-    w = w_in
+    w_history = []
+    w = copy.deepcopy(w_in)
     b = b_in
 
     for i in range(num_iters): 
-        dj_dw, dj_db = compute_gradient(x, y, w, b)
+        dj_dw, dj_db = compute_gradient(x, y, w_in, b_in)
 
-        w -= alpha * dj_dw
-        b -= alpha * dj_db
+        w = w - alpha * dj_dw
+        b = b - alpha * dj_db
 
-    return w, b
+        if i < 100000: 
+            cost = compute_cost(x, y, w, b)
+            J_history.append(cost)
 
+        if i % math.ceil(num_iters/10) == 0: 
+            w_history.append(w)
+            print(f"Iteration {i:4}: Cost {float(J_history[-1]):8.2f}   ")
+        
+    return w, b, J_history, w_history
+        
     
